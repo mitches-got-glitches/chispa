@@ -382,6 +382,37 @@ Here's the pretty error message that's outputted:
 
 ![DataFramesNotEqualError](https://github.com/MrPowers/chispa/blob/main/images/dfs_not_approx_equal.png)
 
+## Comparing elements within ArrayType
+
+The core assertion methods `assert_df_equality` and `assert_column_equality` are capable of comparing elements within PySpark `ArrayType`. The `precision` and `allow_nan_equality` parameters are carried through when comparing array elements. It works for nested arrays too (if an `ArrayType` column holds further arrays as it's elements).
+
+Here are a couple of passing examples to illustrate this behaviour.
+
+```python
+def test_array_elements_are_equal_and_that_allow_nan_equality_carries_through():
+    """This test will pass."""
+    data1 = [([3.2, float('nan')], "jose"), ([float('nan'), 1.7], "karlov")]
+    df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+    data2 = [([3.2, float('nan')], "jose"), ([float('nan'), 1.7], "karlov")]
+    df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+    assert_df_equality(df1, df2, allow_nan_equality=True)
+
+
+def test_array_elements_with_mismatch_raises_error():
+    """This test will fail because the first array element in the first array
+    is different (more than the precision given).
+    """
+    data1 = [([3.2, float('nan')], "jose"), ([float('nan'), 1.72], "karlov")]
+    df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+    data2 = [([1.9, float('nan')], "jose"), ([float('nan'), 1.7], "karlov")]
+    df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+    assert_df_equality(df1, df2, precision=0.1, allow_nan_equality=True)
+```
+
 ## Schema mismatch messages
 
 DataFrame equality messages perform schema comparisons before analyzing the actual content of the DataFrames.  DataFrames that don't have the same schemas should error out as fast as possible.

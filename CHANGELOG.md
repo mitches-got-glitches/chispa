@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Capability for comparing `ArrayType` element equality using the same user-specified parameters `precision` and `allow_nan_equality`. This applies to both `assert_df_equality` and `assert_column_equality`.
+
 ### Changed
 - `DataFramesNotEqualError` changed to `RowsNotEqualError` to reflect it being raised when testing for row equality.
 - The assertion functions `assert_df_equality` and `assert_column_equality` now have optional `precision` parameter to test for approximate equality.

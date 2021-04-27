@@ -182,6 +182,24 @@ def describe_assert_approx_column_equality():
         with pytest.raises(RowsNotEqualError) as e_info:
             assert_df_equality(df1, df2, precision=0.1)
 
+    def test_array_elements_are_equal_and_that_allow_nan_equality_carries_through():
+        data1 = [([3.2, float('nan')], "jose"), ([float('nan'), 1.7], "karlov")]
+        df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+        data2 = [([3.2, float('nan')], "jose"), ([float('nan'), 1.7], "karlov")]
+        df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+        assert_df_equality(df1, df2, allow_nan_equality=True)
+
+    def test_array_elements_with_mismatch_raises_error():
+        data1 = [([3.2, float('nan')], "jose"), ([float('nan'), 1.72], "karlov")]
+        df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+        data2 = [([1.9, float('nan')], "jose"), ([float('nan'), 1.7], "karlov")]
+        df2 = spark.createDataFrame(data2, ["n1", "n2"])
+        with pytest.raises(RowsNotEqualError) as e_info:
+            assert_df_equality(df1, df2, precision=0.1, allow_nan_equality=True)
+
 
 def describe_schema_mismatch_messages():
     def test_schema_mismatch_message():

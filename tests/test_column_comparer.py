@@ -29,6 +29,31 @@ def describe_assert_column_equality():
         assert_column_equality(df, "num1", "num2", allow_nan_equality=True)
 
 
+    def it_equates_array_elements_correctly():
+        data = [([1.0, 7.2], [1.0, 7.2]), ([0.7, 5.6], [0.7, 5.6])]
+        df = spark.createDataFrame(data, ["array1", "array2"])
+        assert_column_equality(df, "array1", "array2")
+
+
+    def it_throws_when_there_is_array_element_mismatch():
+        data = [(['ice', 'cold'], ['ice', 'cold']), (['juice', 'box'], ['cardboard', 'box'])]
+        df = spark.createDataFrame(data, ["array1", "array2"])
+        with pytest.raises(ColumnsNotEqualError) as e_info:
+            assert_column_equality(df, "array1", "array2")
+
+
+    def it_equates_array_nan_elements_correctly_when_allow_nan_equality_is_True():
+        data = [([float('nan'), 7.2], [float('nan'), 7.2]), ([3.4, float('nan')], [3.4, float('nan')])]
+        df = spark.createDataFrame(data, ["array1", "array2"])
+        assert_column_equality(df, "array1", "array2", allow_nan_equality=True)
+
+
+    def it_equates_nested_array_elements_correctly():
+        data = [([[1.0], [7.2]], [[1.0], [7.2]]), ([[0.7]], [[0.7]])]
+        df = spark.createDataFrame(data, ["array1", "array2"])
+        assert_column_equality(df, "array1", "array2")
+
+
 def describe_assert_approx_column_equality():
     def it_works_with_no_mismatches():
         data = [(1.1, 1.1), (1.0004, 1.0005), (.4, .45), (None, None)]

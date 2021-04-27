@@ -5,7 +5,7 @@ from pyspark.sql.types import DataType
 
 from chispa.bcolors import blue
 from chispa.prettytable import PrettyTable
-from chispa.number_helpers import check_equal
+from chispa.number_helpers import check_equal_recursive
 
 
 class ColumnsNotEqualError(Exception):
@@ -71,4 +71,4 @@ def are_elements_equal(
     if (e1 is None and e2 is not None) or (e2 is None and e1 is not None):
         return False
 
-    return check_equal(e1, e2, precision, allow_nan_equality)
+    return check_equal_recursive(e1, e2, precision, allow_nan_equality)

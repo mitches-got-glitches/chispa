@@ -9,6 +9,27 @@ def isnan(x):
         return False
 
 
+def check_equal_recursive(
+    x, y,
+    precision: Optional[float] = None,
+    allow_nan_equality: bool = False,
+) -> bool:
+    """Return True if x and y are equal, including elements of arrays.
+
+    This function calls itself recursively to handle any level of array
+    nesting within the Spark Column.
+    """
+    if isinstance(x, list) & isinstance(y, list):
+        for e1, e2 in zip(x, y):
+            if not check_equal_recursive(e1, e2, precision, allow_nan_equality):
+                return False
+
+    elif not check_equal(x, y, precision, allow_nan_equality):
+        return False
+
+    return True
+
+
 def check_equal(
     x, y,
     precision: Optional[float] = None,

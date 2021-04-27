@@ -18,6 +18,23 @@ def describe_are_rows_equal_when_allowing_nan_equality():
         assert are_rows_equal(Row(n1=float('nan'), n2="jose"), Row(n1=float('nan'), n2="jose"), allow_nan_equality=True) == True
     def returns_False_when_comparing_nan_to_string():
         assert are_rows_equal(Row(n1=float('nan'), n2="jose"), Row(n1="hi", n2="jose"), allow_nan_equality=True) == False
+    def returns_True_when_comparing_nan_values_within_array():
+        assert are_rows_equal(
+            Row(n1=[3.2, float('nan')], n2="jose"),
+            Row(n1=[3.2, float('nan')], n2="jose"),
+            allow_nan_equality=True
+        ) == True
+    def returns_False_when_comparing_nan_values_within_array_if_allow_nan_equality_not_set():
+        assert are_rows_equal(
+            Row(n1=[3.2, float('nan')], n2="jose"),
+            Row(n1=[3.2, float('nan')], n2="jose"),
+        ) == False
+    def returns_True_when_comparing_nan_values_within_nested_array():
+        assert are_rows_equal(
+            Row(n1=[[float('nan')], [3.2, float('nan')], [1.2]], n2="jose"),
+            Row(n1=[[float('nan')], [3.2, float('nan')], [1.2]], n2="jose"),
+            allow_nan_equality=True
+        ) == True
 
 
 def describe_are_rows_equal_when_given_precision():

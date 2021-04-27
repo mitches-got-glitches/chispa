@@ -116,6 +116,65 @@ def describe_assert_df_equality():
             assert_df_equality(df1, df2, allow_nan_equality=False)
 
 
+    def it_can_consider_nan_values_equal_within_arrays_equal():
+        data1 = [
+            ([3.2, float('nan')], "jose"),
+            ([3.2, float('nan')], "jose"),
+        ]
+        df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+        data2 = [
+            ([3.2, float('nan')], "jose"),
+            ([3.2, float('nan')], "jose"),
+        ]
+        df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+        assert_df_equality(df1, df2, allow_nan_equality=True)
+
+
+    def it_can_consider_nan_values_equal_within_nested_arrays_equal():
+        # ArrayType in PySpark can only hold one type, so every element
+        # needs to be a list.
+        data1 = [
+            ([[float('nan')], [3.2, float('nan')], [1.2]], "jose"),
+            ([[float('nan')], [3.2, float('nan')], [1.2]], "jose"),
+        ]
+        df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+        data2 = [
+            ([[float('nan')], [3.2, float('nan')], [1.2]], "jose"),
+            ([[float('nan')], [3.2, float('nan')], [1.2]], "jose"),
+        ]
+        df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+        assert_df_equality(df1, df2, allow_nan_equality=True)
+
+
+    def it_throws_when_elements_within_an_array_are_not_equal():
+        data1 = [([3.2, 2.4], "jose"), ([3.2, 2.4], "carol")]
+        df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+        data2 = [([2.8, 2.4], "jose"), ([3.2, 2.4], "carol")]
+        df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+        with pytest.raises(RowsNotEqualError) as e_info:
+            assert_df_equality(df1, df2)
+
+
+    def it_throws_when_elements_within_a_nested_array_are_not_equal():
+        # ArrayType in PySpark can only hold one type, so every element
+        # needs to be a list. Each ArrayType inside can contain a
+        # different type though.
+        data1 = [([[3.2, 6.7], ["tee"]], "jose"), ([[3.2], [2.4]], "carol")]
+        df1 = spark.createDataFrame(data1, ["n1", "n2"])
+
+        data2 = [([[2.8, 6.7], ["tee"]], "jose"), ([[3.2], [2.4]], "carol")]
+        df2 = spark.createDataFrame(data2, ["n1", "n2"])
+
+        with pytest.raises(RowsNotEqualError) as e_info:
+            assert_df_equality(df1, df2)
+
+
 def describe_assert_approx_df_equality():
     def it_throws_with_content_mismatch():
         data1 = [(1.0, "jose"), (1.1, "li"), (1.2, "laura"), (1.0, None)]

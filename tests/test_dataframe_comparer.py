@@ -116,8 +116,9 @@ def describe_assert_df_equality():
             assert_df_equality(df1, df2, allow_nan_equality=False)
 
 
-def describe_assert_approx_df_equality():
+def describe_assert_df_equality_with_precision():
     def it_throws_with_content_mismatch():
+        """The values in the last row are different."""
         data1 = [(1.0, "jose"), (1.1, "li"), (1.2, "laura"), (1.0, None)]
         df1 = spark.createDataFrame(data1, ["num", "expected_name"])
         data2 = [(1.0, "jose"), (1.05, "li"), (1.0, "laura"), (None, "hi")]
@@ -127,6 +128,7 @@ def describe_assert_approx_df_equality():
 
 
     def it_throws_with_with_length_mismatch():
+        """df1 is two rows longer than df2 so it should throw error."""
         data1 = [(1.0, "jose"), (1.1, "li"), (1.2, "laura"), (None, None)]
         df1 = spark.createDataFrame(data1, ["num", "expected_name"])
         data2 = [(1.0, "jose"), (1.05, "li")]
@@ -136,8 +138,17 @@ def describe_assert_approx_df_equality():
 
 
     def it_does_not_throw_with_no_mismatch():
+        """Both dfs should be equal with given precision."""
         data1 = [(1.0, "jose"), (1.1, "li"), (1.2, "laura"), (None, None)]
         df1 = spark.createDataFrame(data1, ["num", "expected_name"])
         data2 = [(1.0, "jose"), (1.05, "li"), (1.2, "laura"), (None, None)]
         df2 = spark.createDataFrame(data2, ["num", "expected_name"])
         assert_df_equality(df1, df2, precision=0.1)
+
+
+if __name__ == "__main__":
+    data1 = [(1.0, "jose"), (1.1, "li"), (1.2, "laura"), (None, None)]
+    df1 = spark.createDataFrame(data1, ["num", "expected_name"])
+    data2 = [(1.0, "jose"), (1.05, "li"), (1.2, "laura"), (None, None)]
+    df2 = spark.createDataFrame(data2, ["num", "expected_name"])
+    assert_df_equality(df1, df2, precision=0.1)
